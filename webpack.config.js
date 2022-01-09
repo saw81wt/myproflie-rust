@@ -1,6 +1,7 @@
 const path = require('path');
 const dist = path.resolve(__dirname, "dist");
 
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 const WasmPackPlugin = require("@wasm-tool/wasm-pack-plugin");
 
 module.exports = (env, argv) => {
@@ -20,10 +21,12 @@ module.exports = (env, argv) => {
         devServer: {
             host: "0.0.0.0",
             port: 8000,
-            // Route everything to index to support SPA. It should be the same like `publicPath` above.
             historyApiFallback: {
                 index: '/'
-            }
+            },
+            static: {
+                directory: path.join(__dirname, "dist"),
+            },
         },
         experiments: {
             asyncWebAssembly: true,
@@ -32,6 +35,9 @@ module.exports = (env, argv) => {
             new WasmPackPlugin({
                 crateDirectory: __dirname
             }),
+            new HtmlWebpackPlugin({
+                template: path.resolve(__dirname, "static/index.hbs")
+            }),
         ],
         resolve: {
             extensions: [".ts", ".js", ".wasm"],
@@ -39,5 +45,20 @@ module.exports = (env, argv) => {
               crate: __dirname
             }
         },
+        module: {
+            rules: [
+                {
+                    test: /\.hbs$/,
+                    use: [
+                        {
+                            loader: "handlebars-loader",
+                            options: {
+                                rootRelative: './templates/'
+                            }
+                        }
+                    ]
+                },
+            ]
+        }
     }
 }
