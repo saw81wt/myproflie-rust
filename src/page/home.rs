@@ -5,7 +5,7 @@ pub fn view() -> Node<Msg> {
     div![
         C![
             "hero",
-            "bg-base-200",
+            "bg-base-300",
             "flex-grow"
         ],
         div![
@@ -22,8 +22,20 @@ pub fn view() -> Node<Msg> {
                         "font-bold"
                     ],
                     "Welcome!"
+                ],
+                p![
+                    C!["md-5"],
+                    "This site was created by ",
+                    a![
+                        C!["link", "link-neutral"],
+                        attrs! {
+                            At::Href => "https://seed-rs.org/"
+                        },
+                        "Seed"
+                    ],
+                    ", a front-end Rust framework with an elm-like architecture."
                 ]
-            ]
+            ],
         ],
     ]
 }

@@ -5,57 +5,54 @@ pub fn view() -> Node<Msg> {
     div![
         C![
             "hero"
-            "bg-base-200",
+            "bg-base-300",
             "flex-grow"
         ],
         div![
             C![
                 "hero-content",
-                "lg:flex-row-reverse"
-            ],
-            img![
-                C![
-                    "max-w-sm",
-                    "rounded-lg",
-                    "shadow-2xl"
-                ],
-                attrs! {
-                    At::Src => image_src("photo.jpg")
-                }
+                "text-center",
             ],
             div![
-                h1![
-                    C![
-                        "mb-5",
-                        "text-5xl",
-                        "font-bold",
+                C!["max-w-md"],
+                div![
+                    C!["mb-5"],
+                    span![
+                        C![
+                            "text-3xl"
+                        ],
+                        "Sotaro Maehara"
                     ],
-                    "About me",
-                ],
-                p![
-                    C![
-                        "mb-5",
-                        "text-2xl"
+                    span![
+                        C![
+                            "text-x1",
+                            "ml-2",
+                        ],
+                        "1994/04/07",
                     ],
-                    "Sotaro Maehara",
-                ],
-                p![
-                    C![
-                        "mb-5",
-                        "text-opacity-40"
+                    div![
+                        C![
+                            "avatar",
+                            "p-3"
+                        ],
+                        img![
+                            C![
+                                "rounded-lg",
+                                "shadow-1xl",
+                                "w-24 h-24"
+                            ],
+                            attrs! { 
+                                At::Src => image_src("photo.jpg")
+                            }
+                        ]
                     ],
-                    "1994/04/07",
                 ],
                 p![
                     C!["mb-5"],
                     "都内で広告配信エンジニアをしています．",
-                    "興味のある分野はアルゴリズム・機械学習関連．",
-                    "普段触っている言語はPython/C++あたり．",
-                    "最近Rustの勉強もしており，練習を兼ねてポートフォリオを作成"
-                ],
-                a![
-                    C!["md-5"],
-                    "More..."
+                    "アルゴリズム・機械学習関連に興味があります．",
+                    "普段の仕事ではPython/C++でコードを書いております．",
+                    "最近はRustの勉強もしており，練習を兼ねてポートフォリオを作成しました．"
                 ],
             ],
         ],
