@@ -1,4 +1,5 @@
 #![allow(clippy::wildcard_imports)]
+
 use seed::{prelude::*, *};
 
 fn init(_: Url, _: &mut impl Orders<Msg>) -> Model {
@@ -14,7 +15,6 @@ fn update(_: Msg, _: &mut Model, _: &mut impl Orders<Msg>) {}
 fn view(_: &Model) -> Vec<Node<Msg>> {
     nodes![
         div![
-            C!["text-3xl"],
             "Hello World"
         ]
     ]

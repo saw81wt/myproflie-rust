@@ -4,6 +4,7 @@ const dist = path.resolve(__dirname, "dist");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const WasmPackPlugin = require("@wasm-tool/wasm-pack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const WebpackBar = require("webpackbar");
 
 module.exports = (env, argv) => {
   return {
@@ -24,6 +25,7 @@ module.exports = (env, argv) => {
         warning.message ===
         "Critical dependency: the request of a dependency is an expression",
     ],
+    devtool: "eval",
     devServer: {
       host: "0.0.0.0",
       port: 8000,
@@ -38,6 +40,7 @@ module.exports = (env, argv) => {
       asyncWebAssembly: true,
     },
     plugins: [
+      new WebpackBar(),
       new WasmPackPlugin({
         crateDirectory: __dirname
       }),
