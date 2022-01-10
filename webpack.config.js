@@ -93,6 +93,20 @@ module.exports = (env, argv) => {
           ]
         },
         {
+          test: /\.(jpg|jpeg|png|woff|woff2|eot|ttf|svg)$/,
+          use: [
+            {
+              loader: "file-loader",
+              options: {
+                // Don't copy files to `dist`, we do it through `CopyWebpackPlugin` (see above)
+                // - we only want to resolve urls to these files.
+                emitFile: false,
+                name: "[path][name].[ext]"
+              }
+            }
+          ]
+        },
+        {
           test: /\.css$/,
           use: [
             MiniCssExtractPlugin.loader,
