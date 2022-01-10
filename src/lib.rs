@@ -12,7 +12,12 @@ enum Msg {}
 fn update(_: Msg, _: &mut Model, _: &mut impl Orders<Msg>) {}
 
 fn view(_: &Model) -> Vec<Node<Msg>> {
-    nodes![header![C!["hellow"], "Hello"]]
+    nodes![
+        div![
+            C!["text-3xl"],
+            "Hello World"
+        ]
+    ]
 }
 
 #[wasm_bindgen(start)]
