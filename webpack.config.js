@@ -4,7 +4,9 @@ const dist = path.resolve(__dirname, "dist");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const WasmPackPlugin = require("@wasm-tool/wasm-pack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 const WebpackBar = require("webpackbar");
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 
 module.exports = (env, argv) => {
   return {
@@ -41,6 +43,7 @@ module.exports = (env, argv) => {
     },
     plugins: [
       new WebpackBar(),
+      new CleanWebpackPlugin(),
       new WasmPackPlugin({
         crateDirectory: __dirname
       }),
@@ -49,6 +52,14 @@ module.exports = (env, argv) => {
       }),
       new MiniCssExtractPlugin({
         filename: '[name].[contenthash].css'
+      }),
+      new CopyWebpackPlugin({
+        patterns: [
+          {
+            from: "static",
+            to: "static"
+          },
+        ]
       }),
     ],
     resolve: {
@@ -71,18 +82,22 @@ module.exports = (env, argv) => {
           ]
         },
         {
+          test: /\.ts$/,
+          use: [
+            {
+              loader: "ts-loader",
+              options: {
+                configFile: "tsconfig.json"
+              }
+            }
+          ]
+        },
+        {
           test: /\.css$/,
           use: [
             MiniCssExtractPlugin.loader,
             "css-loader",
-            {
-              loader: "postcss-loader",
-              options: {
-                postcssOptions: {
-                  config: path.resolve(__dirname, "postcss.config.js"),
-                }
-              }
-            }
+            "postcss-loader",
           ]
         }
       ]

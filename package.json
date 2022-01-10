@@ -12,6 +12,7 @@
     "autoprefixer": "^10.4.2",
     "babel-loader": "^8.0.5",
     "clean-webpack-plugin": "^4.0.0",
+    "copy-webpack-plugin": "^10.2.0",
     "css-loader": "^6.5.1",
     "daisyui": "^1.22.0",
     "file-loader": "^6.2.0",
