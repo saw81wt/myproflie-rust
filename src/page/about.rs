@@ -5,7 +5,7 @@ pub fn view() -> Node<Msg> {
     div![
         C![
             "hero"
-            "bg-base-300",
+            "bg-base-200",
             "flex-grow"
         ],
         div![
@@ -38,7 +38,7 @@ pub fn view() -> Node<Msg> {
                         img![
                             C![
                                 "rounded-lg",
-                                "shadow-1xl",
+                                "shadow-2xl",
                                 "w-24 h-24"
                             ],
                             attrs! { 

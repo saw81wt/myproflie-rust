@@ -5,7 +5,7 @@ pub fn view() -> Node<Msg> {
     div![
         C![
             "hero",
-            "bg-base-300",
+            "bg-base-200",
             "flex-grow"
         ],
         div![

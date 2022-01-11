@@ -6,8 +6,8 @@ pub fn view(model: &Model) -> Node<Msg> {
         C![
             "navbar",
             "shadow-lg",
-            "bg-base-300",
-            "text-neutral-content"
+            "bg-base-200",
+            "text-base-content"
         ],
         div![
             C![
