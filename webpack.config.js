@@ -18,7 +18,7 @@ module.exports = (env, argv) => {
       app: path.resolve(__dirname, "index.ts")
     },
     output: {
-      publicPath: "/myproflie-rust",
+      publicPath: "/",
       path: dist,
       filename: "[name].[contenthash].js"
     },
@@ -32,7 +32,7 @@ module.exports = (env, argv) => {
       host: "0.0.0.0",
       port: 8000,
       historyApiFallback: {
-        index: '/myproflie-rust'
+        index: '/'
       },
       static: {
         directory: path.join(__dirname, "dist"),
