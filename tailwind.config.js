@@ -1,17 +1,9 @@
 module.exports = {
   mode: 'jit',
-  purge: {
-    content: [
-      './src/**/*.rs',
-      './src/*.rs',
-      './static/**/*.hbs',
-    ],
-    options: {
-      safelist: [
-        /data-theme$/,
-      ]
-    },
-  },
+  content: [
+    './src/**/*.rs',
+    './static/**/*.hbs',
+  ],
   theme: {
     extend: {},
   },
