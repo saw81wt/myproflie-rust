@@ -20,7 +20,6 @@ module.exports = (env, argv) => {
       publicPath: "/",
       path: dist,
       filename: "[name].[contenthash].js",
-      cssFilename: "[name].[contenthash].css",
     },
     ignoreWarnings: [
       (warning) =>
