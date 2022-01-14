@@ -32,8 +32,8 @@ impl Page {
     pub fn init(mut url: Url) -> Self {
         let (page, title) = match url.remaining_path_parts().as_slice() {
             [] => (Self::Home, TITLE_SUFFIX.to_owned()),
-            [ABOUT] => (Self::About, format!("About - {}", TITLE_SUFFIX)),
-            _ => (Self::NotFound, format!("Not found - {}", TITLE_SUFFIX))
+            [ABOUT] => (Self::About, format!("About - {TITLE_SUFFIX}")),
+            _ => (Self::NotFound, format!("Not found - {TITLE_SUFFIX}"))
         };
         document().set_title(&title);
         page
@@ -82,7 +82,7 @@ fn view(model: &Model) -> Vec<Node<Msg>> {
 }
 
 pub fn image_src(image: &str) -> String {
-    format!("{}/{}", IMAGES_PATH, image)
+    format!("{IMAGES_PATH}/{image}")
 }
 
 #[wasm_bindgen(start)]
