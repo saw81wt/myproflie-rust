@@ -3,7 +3,6 @@ const dist = path.resolve(__dirname, "dist");
 
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const WasmPackPlugin = require("@wasm-tool/wasm-pack-plugin");
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const WebpackBar = require("webpackbar");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
@@ -20,7 +19,8 @@ module.exports = (env, argv) => {
     output: {
       publicPath: "/",
       path: dist,
-      filename: "[name].[contenthash].js"
+      filename: "[name].[contenthash].js",
+      cssFilename: "[name].[contenthash].css",
     },
     ignoreWarnings: [
       (warning) =>
@@ -40,6 +40,7 @@ module.exports = (env, argv) => {
     },
     experiments: {
       asyncWebAssembly: true,
+      css: true,
     },
     plugins: [
       new WebpackBar(),
@@ -49,9 +50,6 @@ module.exports = (env, argv) => {
       }),
       new HtmlWebpackPlugin({
         template: path.resolve(__dirname, "static/index.hbs")
-      }),
-      new MiniCssExtractPlugin({
-        filename: '[name].[contenthash].css'
       }),
       new CopyWebpackPlugin({
         patterns: [
@@ -109,8 +107,6 @@ module.exports = (env, argv) => {
         {
           test: /\.css$/,
           use: [
-            MiniCssExtractPlugin.loader,
-            "css-loader",
             "postcss-loader",
           ]
         }
