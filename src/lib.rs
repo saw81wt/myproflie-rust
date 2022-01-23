@@ -1,6 +1,7 @@
 #![allow(clippy::wildcard_imports)]
 
 mod page;
+mod config;
 use seed::{prelude::{*, web_sys::{HtmlCanvasElement}}, *};
 
 const TITLE_SUFFIX: &str = "SotaroProfile";
@@ -18,15 +19,16 @@ fn init(url: Url, orders: &mut impl Orders<Msg>) -> Model {
         mnist: Default::default(),
         canvas: Default::default(),
         drawable: false,
+        mycanvas: MyCanvas::init_my_canvas(),
     }
 }
 
-#[derive(Default)]
 pub struct Model {
     base_url: Url,
     pub page: Page,
     pub mnist: Mnist,
     pub canvas: ElRef<HtmlCanvasElement>,
+    pub mycanvas: MyCanvas,
     drawable: bool,
 }
 
@@ -58,6 +60,35 @@ impl Default for Page {
     }
 }
 
+#[derive(Clone, Copy, Eq, PartialEq)]
+pub struct MyCanvas {
+    height: u32,
+    width: u32,
+    viewHeight: u32,
+    viewWidth: u32,
+    lineWidth: u8,
+}
+
+impl MyCanvas {
+    pub fn init_my_canvas() -> Self {
+        Self {
+            height: config::CANVAS_HEIGHT,
+            width: config::CANVAS_WIDTH,
+            viewHeight: config::CANVAS_VIEW_MIN_HEIGHT,
+            viewWidth: config::CANVAS_VIEW_MIN_WIDTH,
+            lineWidth: config::CANVAS_LINE_WIDTH
+        }
+    }
+
+    pub fn convert_offset_x_to_draw_point_x(self: Self, x: f64) -> f64 {
+        x * self.width as f64 / self.viewWidth as f64
+    }
+
+    pub fn convert_offset_y_to_draw_point_y(self: Self, y: f64) -> f64 {
+        y * self.height as f64 / self.viewHeight as f64
+    }
+}
+
 pub struct Mnist {
     user_input: Vec<u8>,
     estimate_number: Option<u8>
@@ -75,8 +106,8 @@ impl Default for Mnist {
 pub enum Msg {
     UrlChanged(subs::UrlChanged),
     Rendered,
-    PointerDown(web_sys::MouseEvent),
-    PointerMove(web_sys::MouseEvent),
+    DrawStart(web_sys::MouseEvent),
+    Drawing(web_sys::MouseEvent),
     DrawEnd(web_sys::MouseEvent),
 }
 
@@ -103,34 +134,50 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::Rendered => {
             orders.after_next_render(|_| Msg::Rendered).skip();
         },
-        Msg::PointerDown(mouse_event) => {
+        Msg::DrawStart(mouse_event) => {
             let canvas = model.canvas.get().expect("get canvas");
             let ctx = seed::canvas_context_2d(&canvas);
-            ctx.set_line_width(20 as f64);
+            ctx.set_line_width(model.mycanvas.lineWidth as f64);
             ctx.set_line_cap("round");
             ctx.begin_path();
-            ctx.move_to(mouse_event.offset_x() as f64, mouse_event.offset_y() as f64);
+            ctx.move_to(
+                model.mycanvas.convert_offset_x_to_draw_point_x(mouse_event.offset_x() as f64), 
+                model.mycanvas.convert_offset_y_to_draw_point_y(mouse_event.offset_y() as f64)
+            );
             model.drawable = true;
         },
-        Msg::PointerMove(mouse_event) => {
+        Msg::Drawing(mouse_event) => {
             if model.drawable {
                 let canvas = model.canvas.get().expect("get canvas");
                 let ctx = seed::canvas_context_2d(&canvas);
-                ctx.line_to(mouse_event.offset_x() as f64, mouse_event.offset_y() as f64);
+                ctx.line_to(
+                    model.mycanvas.convert_offset_x_to_draw_point_x(mouse_event.offset_x() as f64), 
+                    model.mycanvas.convert_offset_y_to_draw_point_y(mouse_event.offset_y() as f64)
+                );
                 ctx.stroke();
-                ctx.set_line_width(20 as f64);
+                ctx.set_line_width(model.mycanvas.lineWidth as f64);
                 ctx.set_line_cap("round");
                 ctx.begin_path();
-                ctx.move_to(mouse_event.offset_x() as f64, mouse_event.offset_y() as f64);
+                ctx.move_to(
+                    model.mycanvas.convert_offset_x_to_draw_point_x(mouse_event.offset_x() as f64), 
+                    model.mycanvas.convert_offset_y_to_draw_point_y(mouse_event.offset_y() as f64)
+                );
             }
         },
         Msg::DrawEnd(mouse_event) => {
             if model.drawable {
                 let canvas = model.canvas.get().expect("get canvas");
                 let ctx = seed::canvas_context_2d(&canvas);
-                ctx.line_to(mouse_event.offset_x() as f64, mouse_event.offset_y() as f64);
+                ctx.line_to(
+                    model.mycanvas.convert_offset_x_to_draw_point_x(mouse_event.offset_x() as f64), 
+                    model.mycanvas.convert_offset_y_to_draw_point_y(mouse_event.offset_y() as f64)
+                );
                 ctx.stroke();
                 model.drawable = false;
+                
+                let image_str = canvas.to_data_url_with_type("image/png").unwrap();
+                let image_str = image_str.to_string().replace("data:image/png;base64,", "");
+                log!(image_str)
             }
         },
     }

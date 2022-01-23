@@ -12,12 +12,12 @@ pub fn view(canvas: &ElRef<HtmlCanvasElement>, _: &Mnist) -> Node<Msg> {
             canvas![
                 el_ref(canvas),
                 attrs![
-                    At::Width => px(400),
-                    At::Height => px(400)
+                    At::Width => px(28),
+                    At::Height => px(28)
                 ],
                 ev(Ev::PointerDown, |event| {
                     let mouse_event: web_sys::MouseEvent = event.dyn_into::<web_sys::MouseEvent>().unwrap();
-                    Msg::PointerDown(mouse_event)
+                    Msg::DrawStart(mouse_event)
                 }),
                 ev(Ev::PointerUp, |event| {
                     let mouse_event: web_sys::MouseEvent = event.dyn_into::<web_sys::MouseEvent>().unwrap();
@@ -29,10 +29,12 @@ pub fn view(canvas: &ElRef<HtmlCanvasElement>, _: &Mnist) -> Node<Msg> {
                 }),
                 ev(Ev::PointerMove, |event| {
                     let mouse_event: web_sys::MouseEvent = event.dyn_into::<web_sys::MouseEvent>().unwrap();
-                    Msg::PointerMove(mouse_event)
+                    Msg::Drawing(mouse_event)
                 }),
                 style![
-                    St::Border => "5px solid black"
+                    St::Border => "5px solid black",
+                    St::Width => "400px",
+                    St::Height => "400px"
                 ]
             ],
         ]   
