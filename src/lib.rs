@@ -64,9 +64,9 @@ impl Default for Page {
 pub struct MyCanvas {
     height: u32,
     width: u32,
-    viewHeight: u32,
-    viewWidth: u32,
-    lineWidth: u8,
+    view_height: u32,
+    view_width: u32,
+    line_width: u8,
 }
 
 impl MyCanvas {
@@ -74,18 +74,18 @@ impl MyCanvas {
         Self {
             height: config::CANVAS_HEIGHT,
             width: config::CANVAS_WIDTH,
-            viewHeight: config::CANVAS_VIEW_MIN_HEIGHT,
-            viewWidth: config::CANVAS_VIEW_MIN_WIDTH,
-            lineWidth: config::CANVAS_LINE_WIDTH
+            view_height: config::CANVAS_VIEW_MIN_HEIGHT,
+            view_width: config::CANVAS_VIEW_MIN_WIDTH,
+            line_width: config::CANVAS_LINE_WIDTH
         }
     }
 
     pub fn convert_offset_x_to_draw_point_x(self: Self, x: f64) -> f64 {
-        x * self.width as f64 / self.viewWidth as f64
+        x * self.width as f64 / self.view_width as f64
     }
 
     pub fn convert_offset_y_to_draw_point_y(self: Self, y: f64) -> f64 {
-        y * self.height as f64 / self.viewHeight as f64
+        y * self.height as f64 / self.view_height as f64
     }
 }
 
@@ -138,7 +138,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::DrawStart(mouse_event) => {
             let canvas = model.canvas.get().expect("get canvas");
             let ctx = seed::canvas_context_2d(&canvas);
-            ctx.set_line_width(model.mycanvas.lineWidth as f64);
+            ctx.set_line_width(model.mycanvas.line_width as f64);
             ctx.set_line_cap("round");
             ctx.begin_path();
             ctx.move_to(
@@ -156,7 +156,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                     model.mycanvas.convert_offset_y_to_draw_point_y(mouse_event.offset_y() as f64)
                 );
                 ctx.stroke();
-                ctx.set_line_width(model.mycanvas.lineWidth as f64);
+                ctx.set_line_width(model.mycanvas.line_width as f64);
                 ctx.set_line_cap("round");
                 ctx.begin_path();
                 ctx.move_to(

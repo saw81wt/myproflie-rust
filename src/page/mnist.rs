@@ -33,8 +33,8 @@ pub fn view(model: &Model) -> Node<Msg> {
                 }),
                 style![
                     St::Border => "5px solid black",
-                    St::Width => format!("{}px", model.mycanvas.viewWidth),
-                    St::Height => format!("{}px", model.mycanvas.viewHeight)
+                    St::Width => format!("{}px", model.mycanvas.view_width),
+                    St::Height => format!("{}px", model.mycanvas.view_height)
                 ],
                 C!["mb-5"],
             ],
