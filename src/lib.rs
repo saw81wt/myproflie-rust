@@ -109,6 +109,7 @@ pub enum Msg {
     DrawStart(web_sys::MouseEvent),
     Drawing(web_sys::MouseEvent),
     DrawEnd(web_sys::MouseEvent),
+    ClearCanvas,
 }
 
 struct_urls!();
@@ -180,6 +181,11 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 log!(image_str)
             }
         },
+        Msg::ClearCanvas => {
+            let canvas = model.canvas.get().expect("get canvas");
+            let ctx = seed::canvas_context_2d(&canvas);
+            ctx.clear_rect(0.0, 0.0, model.mycanvas.width as f64, model.mycanvas.height as f64)
+        }
     }
 }
 

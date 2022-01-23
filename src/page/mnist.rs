@@ -35,8 +35,19 @@ pub fn view(canvas: &ElRef<HtmlCanvasElement>, _: &Mnist) -> Node<Msg> {
                     St::Border => "5px solid black",
                     St::Width => "400px",
                     St::Height => "400px"
-                ]
+                ],
+                C!["mb-5"],
             ],
+            button![
+                C![
+                    "btn",
+                    "btn-ghost",
+                    "btn-sm",
+                    "rounded-btn"
+                ],
+                "Clear",
+                ev(Ev::Click, |_| Msg::ClearCanvas)
+            ]
         ]   
     ]
 }
