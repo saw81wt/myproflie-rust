@@ -16,31 +16,19 @@ pub fn view(canvas: &ElRef<HtmlCanvasElement>, _: &Mnist) -> Node<Msg> {
                     At::Height => px(400)
                 ],
                 ev(Ev::PointerDown, |event| {
-                    let mouse_event: web_sys::MouseEvent = match event.dyn_into() {
-                        Ok(mouse_event) => mouse_event,
-                        Err(error) => panic!("failed to cast mouse event. {:?}", error)
-                    };
+                    let mouse_event: web_sys::MouseEvent = event.dyn_into::<web_sys::MouseEvent>().unwrap();
                     Msg::PointerDown(mouse_event)
                 }),
                 ev(Ev::PointerUp, |event| {
-                    let mouse_event: web_sys::MouseEvent = match event.dyn_into() {
-                        Ok(mouse_event) => mouse_event,
-                        Err(error) => panic!("failed to cast mouse event. {:?}", error)
-                    };
+                    let mouse_event: web_sys::MouseEvent = event.dyn_into::<web_sys::MouseEvent>().unwrap();
                     Msg::DrawEnd(mouse_event)
                 }),
                 ev(Ev::PointerLeave, |event| {
-                    let mouse_event: web_sys::MouseEvent = match event.dyn_into() {
-                        Ok(mouse_event) => mouse_event,
-                        Err(error) => panic!("failed to cast mouse event. {:?}", error)
-                    };
+                    let mouse_event: web_sys::MouseEvent = event.dyn_into::<web_sys::MouseEvent>().unwrap();
                     Msg::DrawEnd(mouse_event) 
                 }),
                 ev(Ev::PointerMove, |event| {
-                    let mouse_event: web_sys::MouseEvent = match event.dyn_into() {
-                        Ok(mouse_event) => mouse_event,
-                        Err(error) => panic!("failed to cast mouse event. {:?}", error)
-                    };
+                    let mouse_event: web_sys::MouseEvent = event.dyn_into::<web_sys::MouseEvent>().unwrap();
                     Msg::PointerMove(mouse_event)
                 }),
                 style![
