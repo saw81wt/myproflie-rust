@@ -10,54 +10,47 @@ pub fn view() -> Node<Msg> {
     ";
     div![
         C![
-            "hero"
-            "bg-base-200",
-            "flex-grow"
+            "hero-content",
+            "text-center",
         ],
         div![
-            C![
-                "hero-content",
-                "text-center",
-            ],
+            C!["max-w-md"],
             div![
-                C!["max-w-md"],
-                div![
-                    C!["mb-5"],
-                    span![
-                        C![
-                            "text-3xl"
-                        ],
-                        "Sotaro Maehara"
+                C!["mb-5"],
+                span![
+                    C![
+                        "text-3xl"
                     ],
-                    span![
-                        C![
-                            "text-x1",
-                            "ml-2",
-                        ],
-                        "1994/04/07",
-                    ],
-                    div![
-                        C![
-                            "avatar",
-                            "p-3"
-                        ],
-                        img![
-                            C![
-                                "rounded-lg",
-                                "shadow-2xl",
-                                "w-24 h-24"
-                            ],
-                            attrs! { 
-                                At::Src => image_src("photo.jpg")
-                            }
-                        ]
-                    ],
+                    "Sotaro Maehara"
                 ],
-                p![
-                    C!["mb-5"],
-                    description
+                span![
+                    C![
+                        "text-x1",
+                        "ml-2",
+                    ],
+                    "1994/04/07",
+                ],
+                div![
+                    C![
+                        "avatar",
+                        "p-3"
+                    ],
+                    img![
+                        C![
+                            "rounded-lg",
+                            "shadow-2xl",
+                            "w-24 h-24"
+                        ],
+                        attrs! { 
+                            At::Src => image_src("photo.jpg")
+                        }
+                    ]
                 ],
             ],
-        ],
+            p![
+                C!["mb-5"],
+                description
+            ],
+        ], 
     ]
 }

@@ -145,12 +145,19 @@ fn view(model: &Model) -> Vec<Node<Msg>> {
                 "min-h-screen"
             ],
             page::partial::header::view(&model),
-            match model.page {
-                Page::Home => page::home::view(),
-                Page::About => page::about::view(),
-                Page::MNIST => page::mnist::view(&model.canvas, &model.mnist),
-                Page::NotFound => page::not_found::view(),
-            },
+            div![
+                C![
+                    "hero",
+                    "bg-base-200",
+                    "flex-grow"
+                ],
+                match model.page {
+                    Page::Home => page::home::view(),
+                    Page::About => page::about::view(),
+                    Page::MNIST => page::mnist::view(&model.canvas, &model.mnist),
+                    Page::NotFound => page::not_found::view(),
+                },
+            ],
             page::partial::footer::view(),
         ]
     ]
