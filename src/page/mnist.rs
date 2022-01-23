@@ -8,6 +8,18 @@ pub fn view(model: &Model) -> Node<Msg> {
             "hero-content"
         ],
         div![
+            p![
+                C![
+                    "text-x1",
+                    "mb-5",
+                ],
+                if let Some(estimate_number) = model.mnist.estimate_number{
+                    format!("あなたが書いた数字は{estimate_number}です").to_string()
+                }
+                else {
+                    "0~9までの数字を書いてください".to_string()
+                }
+            ],
             C!["max-w-md"],
             canvas![
                 el_ref(&model.canvas),

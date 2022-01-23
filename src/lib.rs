@@ -2,7 +2,11 @@
 
 mod page;
 mod config;
-use seed::{prelude::{*, web_sys::{HtmlCanvasElement}}, *};
+use seed::{prelude::*, *};
+use tract_onnx::prelude::*;
+use image;
+use base64;
+use std::io::BufReader;
 
 const TITLE_SUFFIX: &str = "SotaroProfile";
 const IMAGES_PATH: &str = "static/images";
@@ -27,7 +31,7 @@ pub struct Model {
     base_url: Url,
     pub page: Page,
     pub mnist: Mnist,
-    pub canvas: ElRef<HtmlCanvasElement>,
+    pub canvas: ElRef<web_sys::HtmlCanvasElement>,
     pub mycanvas: MyCanvas,
     drawable: bool,
 }
@@ -178,6 +182,16 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 
                 let image_str = canvas.to_data_url_with_type("image/png").unwrap();
                 let image_str = image_str.to_string().replace("data:image/png;base64,", "");
+                
+                match predict(&image_str) {
+                    Ok(result) => {
+                        log!("expected: {}, {}", result.unwrap().0, result.unwrap().1);
+                        if let Some(estimate_number) = result {
+                            model.mnist.estimate_number = Some(estimate_number.1 as u8);
+                        }
+                    },
+                    Err(err) => log!("err {}", err)
+                }
                 log!(image_str)
             }
         },
@@ -189,7 +203,34 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     }
 }
 
-fn view(model: &Model) -> Vec<Node<Msg>> {
+fn predict(image_str: &str) ->TractResult<Option<(f32, i32)>> {
+    let buffer = base64::decode(&image_str).unwrap();
+    let input_data = image::load_from_memory_with_format(&buffer, image::ImageFormat::Png)
+        .unwrap()
+        .to_luma_alpha8();
+
+    let model_byte = include_bytes!(r#"../static/model/mnist-8.onnx"#);
+    let onxx_model = tract_onnx::onnx()
+        .model_for_read(&mut BufReader::new(&model_byte[..]))?
+        .with_input_fact(0, InferenceFact::dt_shape(f32::datum_type(), tvec!(1, 1, 28, 28)))?
+        .into_optimized()?
+        .into_runnable()?;
+    let image: Tensor = tract_ndarray::Array4::from_shape_fn((1, 1, 28, 28), |(_, _, y, x)| -> f32 {
+        input_data[(x as _, y as _)][1] as f32 / 255.0
+    }).into();
+
+    let result = onxx_model.run(tvec![image])?;
+    let best = result[0]
+        .to_array_view::<f32>()?
+        .iter()
+        .cloned()
+        .zip(0..)
+        .max_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+    
+    Ok(best)
+}
+
+fn view(model: &Model) -> Vec<virtual_dom::Node<Msg>> {
     nodes![
         div![
             C![
@@ -207,7 +248,7 @@ fn view(model: &Model) -> Vec<Node<Msg>> {
                 match model.page {
                     Page::Home => page::home::view(),
                     Page::About => page::about::view(),
-                    Page::MNIST => page::mnist::view(&model, &model.mnist),
+                    Page::MNIST => page::mnist::view(&model),
                     Page::NotFound => page::not_found::view(),
                 },
             ],
