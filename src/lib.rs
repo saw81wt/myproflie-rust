@@ -94,14 +94,14 @@ impl MyCanvas {
 }
 
 pub struct Mnist {
-    user_input: Vec<u8>,
+    // user_input: Vec<u8>,
     estimate_number: Option<u8>
 }
 
 impl Default for Mnist {
     fn default() -> Self {
         Self {
-            user_input: vec![],
+            // user_input: vec![],
             estimate_number: None
         }
     }
@@ -185,14 +185,12 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 
                 match predict(&image_str) {
                     Ok(result) => {
-                        log!("expected: {}, {}", result.unwrap().0, result.unwrap().1);
                         if let Some(estimate_number) = result {
                             model.mnist.estimate_number = Some(estimate_number.1 as u8);
                         }
                     },
-                    Err(err) => log!("err {}", err)
+                    Err(_) => {}
                 }
-                log!(image_str)
             }
         },
         Msg::ClearCanvas => {
