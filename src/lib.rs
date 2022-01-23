@@ -76,8 +76,8 @@ pub enum Msg {
     UrlChanged(subs::UrlChanged),
     Rendered,
     PointerDown(web_sys::MouseEvent),
-    PointerUp(web_sys::MouseEvent),
     PointerMove(web_sys::MouseEvent),
+    DrawEnd(web_sys::MouseEvent),
 }
 
 struct_urls!();
@@ -106,6 +106,8 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::PointerDown(mouse_event) => {
             let canvas = model.canvas.get().expect("get canvas");
             let ctx = seed::canvas_context_2d(&canvas);
+            ctx.set_line_width(20 as f64);
+            ctx.set_line_cap("round");
             ctx.begin_path();
             ctx.move_to(mouse_event.offset_x() as f64, mouse_event.offset_y() as f64);
             model.drawable = true;
@@ -116,16 +118,20 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 let ctx = seed::canvas_context_2d(&canvas);
                 ctx.line_to(mouse_event.offset_x() as f64, mouse_event.offset_y() as f64);
                 ctx.stroke();
+                ctx.set_line_width(20 as f64);
+                ctx.set_line_cap("round");
                 ctx.begin_path();
                 ctx.move_to(mouse_event.offset_x() as f64, mouse_event.offset_y() as f64);
             }
         },
-        Msg::PointerUp(mouse_event) => {
-            let canvas = model.canvas.get().expect("get canvas");
-            let ctx = seed::canvas_context_2d(&canvas);
-            ctx.line_to(mouse_event.offset_x() as f64, mouse_event.offset_y() as f64);
-            ctx.stroke();
-            model.drawable = false;
+        Msg::DrawEnd(mouse_event) => {
+            if model.drawable {
+                let canvas = model.canvas.get().expect("get canvas");
+                let ctx = seed::canvas_context_2d(&canvas);
+                ctx.line_to(mouse_event.offset_x() as f64, mouse_event.offset_y() as f64);
+                ctx.stroke();
+                model.drawable = false;
+            }
         },
     }
 }

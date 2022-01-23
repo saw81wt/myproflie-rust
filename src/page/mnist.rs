@@ -19,14 +19,18 @@ pub fn view(canvas: &ElRef<HtmlCanvasElement>, _: &Mnist) -> Node<Msg> {
             }),
             ev(Ev::PointerUp, |event| {
                 let mouse_event: web_sys::MouseEvent = event.unchecked_into();
-                Msg::PointerUp(mouse_event)
+                Msg::DrawEnd(mouse_event)
+            }),
+            ev(Ev::PointerLeave, |event| {
+                let mouse_event: web_sys::MouseEvent = event.unchecked_into();
+                Msg::DrawEnd(mouse_event) 
             }),
             ev(Ev::PointerMove, |event| {
                 let mouse_event: web_sys::MouseEvent = event.unchecked_into();
                 Msg::PointerMove(mouse_event)
             }),
             style![
-                St::Border => "1px solid black"
+                St::Border => "5px solid black"
             ]
         ]
     ]
