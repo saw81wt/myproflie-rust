@@ -2,6 +2,12 @@ use crate::{Msg, image_src};
 use seed::{prelude::*, *};
 
 pub fn view() -> Node<Msg> {
+    let description: &'static str = "
+        都内で広告配信エンジニアをしています.
+        アルゴリズム・機械学習関連に興味があります．
+        普段の仕事ではPython/C++でコードを書いております．
+        最近はRustの勉強もしており，練習を兼ねてポートフォリオを作成しました．
+    ";
     div![
         C![
             "hero"
@@ -49,10 +55,7 @@ pub fn view() -> Node<Msg> {
                 ],
                 p![
                     C!["mb-5"],
-                    "都内で広告配信エンジニアをしています．",
-                    "アルゴリズム・機械学習関連に興味があります．",
-                    "普段の仕事ではPython/C++でコードを書いております．",
-                    "最近はRustの勉強もしており，練習を兼ねてポートフォリオを作成しました．"
+                    description
                 ],
             ],
         ],
