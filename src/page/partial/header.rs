@@ -65,6 +65,18 @@ pub fn view(model: &Model) -> Node<Msg> {
                         "btn-sm",
                         "rounded-btn"
                     ],
+                    "MNIST",
+                    attrs! {
+                        At::Href => Urls::new(&model.base_url).mnist()
+                    },
+                ],
+                a![
+                    C![
+                        "btn",
+                        "btn-ghost",
+                        "btn-sm",
+                        "rounded-btn"
+                    ],
                     attrs! {
                         At::Href => "https://twitter.com/saw_poke",
                     },
