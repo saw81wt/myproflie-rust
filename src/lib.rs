@@ -207,7 +207,7 @@ fn view(model: &Model) -> Vec<Node<Msg>> {
                 match model.page {
                     Page::Home => page::home::view(),
                     Page::About => page::about::view(),
-                    Page::MNIST => page::mnist::view(&model.canvas, &model.mnist),
+                    Page::MNIST => page::mnist::view(&model, &model.mnist),
                     Page::NotFound => page::not_found::view(),
                 },
             ],

@@ -1,7 +1,7 @@
-use crate::{Msg, Mnist};
-use seed::{prelude::{*, web_sys::HtmlCanvasElement}, *};
+use crate::{Msg, Model};
+use seed::{prelude::*, *};
 
-pub fn view(canvas: &ElRef<HtmlCanvasElement>, _: &Mnist) -> Node<Msg> {
+pub fn view(model: &Model) -> Node<Msg> {
     div![
         C![
             "text-center",
@@ -10,10 +10,10 @@ pub fn view(canvas: &ElRef<HtmlCanvasElement>, _: &Mnist) -> Node<Msg> {
         div![
             C!["max-w-md"],
             canvas![
-                el_ref(canvas),
+                el_ref(&model.canvas),
                 attrs![
-                    At::Width => px(28),
-                    At::Height => px(28)
+                    At::Width => px(model.mycanvas.width),
+                    At::Height => px(model.mycanvas.height)
                 ],
                 ev(Ev::PointerDown, |event| {
                     let mouse_event: web_sys::MouseEvent = event.dyn_into::<web_sys::MouseEvent>().unwrap();
@@ -33,8 +33,8 @@ pub fn view(canvas: &ElRef<HtmlCanvasElement>, _: &Mnist) -> Node<Msg> {
                 }),
                 style![
                     St::Border => "5px solid black",
-                    St::Width => "400px",
-                    St::Height => "400px"
+                    St::Width => format!("{}px", model.mycanvas.viewWidth),
+                    St::Height => format!("{}px", model.mycanvas.viewHeight)
                 ],
                 C!["mb-5"],
             ],
