@@ -2,7 +2,8 @@
 
 mod page;
 mod config;
-use seed::{prelude::*, *};
+use seed::{C, div, nodes, document, console_error_panic_hook};
+use seed::prelude::*;
 use tract_onnx::prelude::*;
 use image;
 use base64;
@@ -116,7 +117,7 @@ pub enum Msg {
     ClearCanvas,
 }
 
-struct_urls!();
+seed::struct_urls!();
 impl<'a> Urls<'a> {
     pub fn home(self) -> Url {
         self.base_url()
@@ -228,7 +229,7 @@ fn predict(image_str: &str) ->TractResult<Option<(f32, i32)>> {
     Ok(best)
 }
 
-fn view(model: &Model) -> Vec<virtual_dom::Node<Msg>> {
+fn view(model: &Model) -> Vec<seed::virtual_dom::Node<Msg>> {
     nodes![
         div![
             C![
