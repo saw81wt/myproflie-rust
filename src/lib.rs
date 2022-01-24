@@ -184,13 +184,10 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 let image_str = canvas.to_data_url_with_type("image/png").unwrap();
                 let image_str = image_str.to_string().replace("data:image/png;base64,", "");
                 
-                match predict(&image_str) {
-                    Ok(result) => {
-                        if let Some(estimate_number) = result {
-                            model.mnist.estimate_number = Some(estimate_number.1 as u8);
-                        }
-                    },
-                    Err(_) => {}
+                if let Ok(result) = predict(&image_str) {
+                    if let Some(estimate_number) = result {
+                        model.mnist.estimate_number = Some(estimate_number.1 as u8);
+                    }
                 }
             }
         },
