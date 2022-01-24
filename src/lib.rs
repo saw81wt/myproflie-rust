@@ -2,7 +2,8 @@
 
 mod page;
 mod config;
-use seed::{prelude::*, *};
+use seed::{C, div, nodes, document, console_error_panic_hook};
+use seed::prelude::*;
 use tract_onnx::prelude::*;
 use image;
 use base64;
@@ -20,19 +21,19 @@ fn init(url: Url, orders: &mut impl Orders<Msg>) -> Model {
     Model {
         base_url: url.to_base_url(),
         page: Page::Home,
-        mnist: Default::default(),
         canvas: Default::default(),
+        canvas_settings: CanvasSettings::init_my_canvas(),
         drawable: false,
-        mycanvas: MyCanvas::init_my_canvas(),
+        estimate_number: None
     }
 }
 
 pub struct Model {
     base_url: Url,
-    pub page: Page,
-    pub mnist: Mnist,
-    pub canvas: ElRef<web_sys::HtmlCanvasElement>,
-    pub mycanvas: MyCanvas,
+    page: Page,
+    canvas: ElRef<web_sys::HtmlCanvasElement>,
+    canvas_settings: CanvasSettings,
+    estimate_number: Option<u8>,
     drawable: bool,
 }
 
@@ -65,7 +66,7 @@ impl Default for Page {
 }
 
 #[derive(Clone, Copy, Eq, PartialEq)]
-pub struct MyCanvas {
+pub struct CanvasSettings {
     height: u32,
     width: u32,
     view_height: u32,
@@ -73,7 +74,7 @@ pub struct MyCanvas {
     line_width: u8,
 }
 
-impl MyCanvas {
+impl CanvasSettings {
     pub fn init_my_canvas() -> Self {
         Self {
             height: config::CANVAS_HEIGHT,
@@ -93,20 +94,6 @@ impl MyCanvas {
     }
 }
 
-pub struct Mnist {
-    // user_input: Vec<u8>,
-    estimate_number: Option<u8>
-}
-
-impl Default for Mnist {
-    fn default() -> Self {
-        Self {
-            // user_input: vec![],
-            estimate_number: None
-        }
-    }
-}
-
 pub enum Msg {
     UrlChanged(subs::UrlChanged),
     Rendered,
@@ -116,7 +103,7 @@ pub enum Msg {
     ClearCanvas,
 }
 
-struct_urls!();
+seed::struct_urls!();
 impl<'a> Urls<'a> {
     pub fn home(self) -> Url {
         self.base_url()
@@ -142,12 +129,12 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::DrawStart(mouse_event) => {
             let canvas = model.canvas.get().expect("get canvas");
             let ctx = seed::canvas_context_2d(&canvas);
-            ctx.set_line_width(model.mycanvas.line_width as f64);
+            ctx.set_line_width(model.canvas_settings.line_width as f64);
             ctx.set_line_cap("round");
             ctx.begin_path();
             ctx.move_to(
-                model.mycanvas.convert_offset_x_to_draw_point_x(mouse_event.offset_x() as f64), 
-                model.mycanvas.convert_offset_y_to_draw_point_y(mouse_event.offset_y() as f64)
+                model.canvas_settings.convert_offset_x_to_draw_point_x(mouse_event.offset_x() as f64), 
+                model.canvas_settings.convert_offset_y_to_draw_point_y(mouse_event.offset_y() as f64)
             );
             model.drawable = true;
         },
@@ -156,16 +143,16 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 let canvas = model.canvas.get().expect("get canvas");
                 let ctx = seed::canvas_context_2d(&canvas);
                 ctx.line_to(
-                    model.mycanvas.convert_offset_x_to_draw_point_x(mouse_event.offset_x() as f64), 
-                    model.mycanvas.convert_offset_y_to_draw_point_y(mouse_event.offset_y() as f64)
+                    model.canvas_settings.convert_offset_x_to_draw_point_x(mouse_event.offset_x() as f64), 
+                    model.canvas_settings.convert_offset_y_to_draw_point_y(mouse_event.offset_y() as f64)
                 );
                 ctx.stroke();
-                ctx.set_line_width(model.mycanvas.line_width as f64);
+                ctx.set_line_width(model.canvas_settings.line_width as f64);
                 ctx.set_line_cap("round");
                 ctx.begin_path();
                 ctx.move_to(
-                    model.mycanvas.convert_offset_x_to_draw_point_x(mouse_event.offset_x() as f64), 
-                    model.mycanvas.convert_offset_y_to_draw_point_y(mouse_event.offset_y() as f64)
+                    model.canvas_settings.convert_offset_x_to_draw_point_x(mouse_event.offset_x() as f64), 
+                    model.canvas_settings.convert_offset_y_to_draw_point_y(mouse_event.offset_y() as f64)
                 );
             }
         },
@@ -174,29 +161,29 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 let canvas = model.canvas.get().expect("get canvas");
                 let ctx = seed::canvas_context_2d(&canvas);
                 ctx.line_to(
-                    model.mycanvas.convert_offset_x_to_draw_point_x(mouse_event.offset_x() as f64), 
-                    model.mycanvas.convert_offset_y_to_draw_point_y(mouse_event.offset_y() as f64)
+                    model.canvas_settings.convert_offset_x_to_draw_point_x(mouse_event.offset_x() as f64), 
+                    model.canvas_settings.convert_offset_y_to_draw_point_y(mouse_event.offset_y() as f64)
                 );
                 ctx.stroke();
                 model.drawable = false;
                 
-                let image_str = canvas.to_data_url_with_type("image/png").unwrap();
-                let image_str = image_str.to_string().replace("data:image/png;base64,", "");
+                let image_str = canvas
+                    .to_data_url_with_type("image/png")
+                    .unwrap()
+                    .to_string()
+                    .replace("data:image/png;base64,", "");
                 
-                match predict(&image_str) {
-                    Ok(result) => {
-                        if let Some(estimate_number) = result {
-                            model.mnist.estimate_number = Some(estimate_number.1 as u8);
-                        }
-                    },
-                    Err(_) => {}
+                if let Ok(result) = predict(&image_str) {
+                    if let Some(estimate_number) = result {
+                        model.estimate_number = Some(estimate_number.1 as u8);
+                    }
                 }
             }
         },
         Msg::ClearCanvas => {
             let canvas = model.canvas.get().expect("get canvas");
             let ctx = seed::canvas_context_2d(&canvas);
-            ctx.clear_rect(0.0, 0.0, model.mycanvas.width as f64, model.mycanvas.height as f64)
+            ctx.clear_rect(0.0, 0.0, model.canvas_settings.width as f64, model.canvas_settings.height as f64)
         }
     }
 }
@@ -208,7 +195,7 @@ fn predict(image_str: &str) ->TractResult<Option<(f32, i32)>> {
         .to_luma_alpha8();
 
     let model_byte = include_bytes!(r#"../static/model/mnist-8.onnx"#);
-    let onxx_model = tract_onnx::onnx()
+    let onxx_model: SimplePlan<TypedFact, Box<dyn TypedOp>, Graph<TypedFact, Box<dyn TypedOp>>> = tract_onnx::onnx()
         .model_for_read(&mut BufReader::new(&model_byte[..]))?
         .with_input_fact(0, InferenceFact::dt_shape(f32::datum_type(), tvec!(1, 1, 28, 28)))?
         .into_optimized()?
@@ -218,7 +205,7 @@ fn predict(image_str: &str) ->TractResult<Option<(f32, i32)>> {
     }).into();
 
     let result = onxx_model.run(tvec![image])?;
-    let best = result[0]
+    let best: Option<(f32, i32)> = result[0]
         .to_array_view::<f32>()?
         .iter()
         .cloned()
@@ -228,7 +215,7 @@ fn predict(image_str: &str) ->TractResult<Option<(f32, i32)>> {
     Ok(best)
 }
 
-fn view(model: &Model) -> Vec<virtual_dom::Node<Msg>> {
+fn view(model: &Model) -> Vec<seed::virtual_dom::Node<Msg>> {
     nodes![
         div![
             C![

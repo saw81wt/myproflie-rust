@@ -13,7 +13,7 @@ pub fn view(model: &Model) -> Node<Msg> {
                     "text-x1",
                     "mb-5",
                 ],
-                if let Some(estimate_number) = model.mnist.estimate_number{
+                if let Some(estimate_number) = model.estimate_number{
                     format!("あなたが書いた数字は{estimate_number}です").to_string()
                 }
                 else {
@@ -24,8 +24,8 @@ pub fn view(model: &Model) -> Node<Msg> {
             canvas![
                 el_ref(&model.canvas),
                 attrs![
-                    At::Width => px(model.mycanvas.width),
-                    At::Height => px(model.mycanvas.height)
+                    At::Width => px(model.canvas_settings.width),
+                    At::Height => px(model.canvas_settings.height)
                 ],
                 ev(Ev::PointerDown, |event| {
                     let mouse_event: web_sys::MouseEvent = event.dyn_into::<web_sys::MouseEvent>().unwrap();
@@ -45,8 +45,8 @@ pub fn view(model: &Model) -> Node<Msg> {
                 }),
                 style![
                     St::Border => "5px solid black",
-                    St::Width => format!("{}px", model.mycanvas.view_width),
-                    St::Height => format!("{}px", model.mycanvas.view_height)
+                    St::Width => format!("{}px", model.canvas_settings.view_width),
+                    St::Height => format!("{}px", model.canvas_settings.view_height)
                 ],
                 C!["mb-5"],
             ],
