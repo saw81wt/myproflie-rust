@@ -2,7 +2,9 @@
 
 mod page;
 mod config;
-use seed::{C, div, nodes, document, console_error_panic_hook};
+use seed::{C, div, nodes, document};
+#[cfg(debug_assertions)]
+use seed::console_error_panic_hook;
 use seed::prelude::*;
 use tract_onnx::prelude::*;
 use image;
@@ -22,7 +24,14 @@ fn init(url: Url, orders: &mut impl Orders<Msg>) -> Model {
         base_url: url.to_base_url(),
         page: Page::Home,
         canvas: Default::default(),
-        canvas_settings: CanvasSettings::init_my_canvas(),
+        canvas_settings: CanvasSettings {
+            height: config::CANVAS_HEIGHT,
+            width: config::CANVAS_WIDTH,
+            view_height: config::CANVAS_VIEW_MIN_HEIGHT,
+            view_width: config::CANVAS_VIEW_MIN_WIDTH,
+            line_width: config::CANVAS_LINE_WIDTH,
+            line_cap: config::ACNVAS_LINE_CAP
+        },
         drawable: false,
         estimate_number: None
     }
@@ -72,25 +81,22 @@ pub struct CanvasSettings {
     view_height: u32,
     view_width: u32,
     line_width: u8,
+    line_cap: &'static str
 }
 
 impl CanvasSettings {
-    pub fn init_my_canvas() -> Self {
-        Self {
-            height: config::CANVAS_HEIGHT,
-            width: config::CANVAS_WIDTH,
-            view_height: config::CANVAS_VIEW_MIN_HEIGHT,
-            view_width: config::CANVAS_VIEW_MIN_WIDTH,
-            line_width: config::CANVAS_LINE_WIDTH
+    pub fn convert_offset_x_to_draw_point_x(self: Self, x: f64) -> f64 {
+        match self.view_width {
+            0_u32 => 0.0,
+            _ => x * self.width as f64 / self.view_width as f64
         }
     }
 
-    pub fn convert_offset_x_to_draw_point_x(self: Self, x: f64) -> f64 {
-        x * self.width as f64 / self.view_width as f64
-    }
-
     pub fn convert_offset_y_to_draw_point_y(self: Self, y: f64) -> f64 {
-        y * self.height as f64 / self.view_height as f64
+        match self.view_height {
+            0_u32 => 0.0,
+            _ => y * self.height as f64 / self.view_height as f64,
+        }
     }
 }
 
@@ -130,7 +136,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             let canvas = model.canvas.get().expect("get canvas");
             let ctx = seed::canvas_context_2d(&canvas);
             ctx.set_line_width(model.canvas_settings.line_width as f64);
-            ctx.set_line_cap("round");
+            ctx.set_line_cap(model.canvas_settings.line_cap);
             ctx.begin_path();
             ctx.move_to(
                 model.canvas_settings.convert_offset_x_to_draw_point_x(mouse_event.offset_x() as f64), 
@@ -148,7 +154,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 );
                 ctx.stroke();
                 ctx.set_line_width(model.canvas_settings.line_width as f64);
-                ctx.set_line_cap("round");
+                ctx.set_line_cap(model.canvas_settings.line_cap);
                 ctx.begin_path();
                 ctx.move_to(
                     model.canvas_settings.convert_offset_x_to_draw_point_x(mouse_event.offset_x() as f64), 
@@ -167,13 +173,19 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 ctx.stroke();
                 model.drawable = false;
                 
-                let image_str = canvas
-                    .to_data_url_with_type("image/png")
+                let image_str: String = canvas.to_data_url_with_type("image/png")
                     .unwrap()
                     .to_string()
                     .replace("data:image/png;base64,", "");
+
+                let buffer: Vec<u8> = base64::decode(&image_str)
+                    .unwrap();
+
+                let input_data = image::load_from_memory_with_format(&buffer, image::ImageFormat::Png)
+                    .unwrap()
+                    .to_luma_alpha8();
                 
-                if let Ok(result) = predict(&image_str) {
+                if let Ok(result) = predict(&input_data) {
                     if let Some(estimate_number) = result {
                         model.estimate_number = Some(estimate_number.1 as u8);
                     }
@@ -188,12 +200,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     }
 }
 
-fn predict(image_str: &str) ->TractResult<Option<(f32, i32)>> {
-    let buffer = base64::decode(&image_str).unwrap();
-    let input_data = image::load_from_memory_with_format(&buffer, image::ImageFormat::Png)
-        .unwrap()
-        .to_luma_alpha8();
-
+fn predict(input_data: &image::ImageBuffer<image::LumaA<u8>, Vec<u8>>) ->TractResult<Option<(f32, i32)>> {
     let model_byte = include_bytes!(r#"../static/model/mnist-8.onnx"#);
     let onxx_model: SimplePlan<TypedFact, Box<dyn TypedOp>, Graph<TypedFact, Box<dyn TypedOp>>> = tract_onnx::onnx()
         .model_for_read(&mut BufReader::new(&model_byte[..]))?
@@ -248,6 +255,7 @@ pub fn image_src(image: &str) -> String {
 
 #[wasm_bindgen(start)]
 pub fn start() {
+    #[cfg(debug_assertions)]
     console_error_panic_hook::set_once();
 
     App::start("app", init, update, view);
