@@ -255,7 +255,7 @@ fn view(model: &Model) -> Vec<seed::virtual_dom::Node<Msg>> {
                     "bg-base-200",
                     "flex-1"
                 ],
-                page::partial::overlay_menu::view(&model),
+                page::partial::slide_var::view(&model),
                 match model.page {
                     Page::Home => page::home::view(),
                     Page::About => page::about::view(),
