@@ -10,7 +10,6 @@ pub fn view() -> Node<Msg> {
     ";
     div![
         C![
-            "hero-content",
             "text-center",
         ],
         div![

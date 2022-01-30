@@ -5,7 +5,6 @@ pub fn view(model: &Model) -> Node<Msg> {
     div![
         C![
             "text-center",
-            "hero-content"
         ],
         div![
             p![

@@ -4,7 +4,6 @@ use seed::{prelude::*, *};
 pub fn view(model: &Model) -> Node<Msg> {
     div![
         C![
-            "hero-content",
             "text-center",
         ],
         div![

@@ -5,7 +5,6 @@ pub fn view() -> Node<Msg> {
     div![
         C![
             "text-center",
-            "hero-content",
         ],
         div![
             C!["max-w-md"],
