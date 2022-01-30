@@ -194,6 +194,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                     Err(_) => { orders.request_url(Urls::new(&model.base_url).internal_server_error()); return; },
                 };
                 
+                return;
                 match predict(&input_data) {
                     Ok(result) => {
                         if let Some(estimate_number) = result {

@@ -25,9 +25,12 @@ pub fn view(model: &Model) -> Node<Msg> {
         ],
         div![
             C![
+                "flex-none",
+                "hidden",
                 "px-2",
                 "mx-2",
                 "navbar-end",
+                "md:flex",
             ],
             div![
                 C![
@@ -95,7 +98,44 @@ pub fn view(model: &Model) -> Node<Msg> {
                     ]
                 ],
             ]
+        ],
+        div![
+            C![
+                "flex",
+                "px-2",
+                "mx-2",
+                "navbar-end",
+                "md:flex-none",
+                "md:hidden"
+            ],
+            button![
+                C![
+                    "btn",
+                    "rounded-btn"
+                    "btn-sm",
+                    "btn-ghost",
+                ],
+                svg![
+                    C![
+                        "inline-block",
+                        "stroke-current",
+                    ],
+                    attrs! {
+                        At::Width => 24,
+                        At::Height => 24,
+                        At::ViewBox => "0 0 24 24",
+                        At::Fill => "none",
+                        At::StrokeWidth => 2,
+                        At::StrokeLinecap => "round",
+                        At::StrokeLineJoin => "round"
+                    },
+                    path![
+                        attrs! {
+                            At::D => "M4 6h16M4 12h16M4 18h16"
+                        }
+                    ]
+                ]
+            ]
         ]
     ]
-
 }
