@@ -7,7 +7,6 @@ pub fn view(model: &Model) -> Node<Msg> {
             "navbar",
             "shadow-lg",
             "bg-base-200",
-            "text-base-content"
         ],
         div![
             C![
@@ -133,9 +132,10 @@ pub fn view(model: &Model) -> Node<Msg> {
                         attrs! {
                             At::D => "M4 6h16M4 12h16M4 18h16"
                         }
-                    ]
-                ]
-            ]
-        ]
+                    ],
+                ],
+                ev(Ev::Click, |_| Msg::TranslateSlideVar),
+            ],
+        ],
     ]
 }

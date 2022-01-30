@@ -25,6 +25,7 @@ fn init(url: Url, orders: &mut impl Orders<Msg>) -> Model {
         base_url: url.to_base_url(),
         page: Page::Home,
         canvas: Default::default(),
+        var_hidden: true,
         canvas_settings: CanvasSettings {
             height: config::CANVAS_HEIGHT,
             width: config::CANVAS_WIDTH,
@@ -42,6 +43,7 @@ pub struct Model {
     base_url: Url,
     page: Page,
     canvas: ElRef<web_sys::HtmlCanvasElement>,
+    var_hidden: bool,
     canvas_settings: CanvasSettings,
     estimate_number: Option<u8>,
     drawable: bool,
@@ -110,6 +112,7 @@ pub enum Msg {
     Drawing(web_sys::MouseEvent),
     DrawEnd(web_sys::MouseEvent),
     ClearCanvas,
+    TranslateSlideVar,
 }
 
 seed::struct_urls!();
@@ -194,7 +197,6 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                     Err(_) => { orders.request_url(Urls::new(&model.base_url).internal_server_error()); return; },
                 };
                 
-                return;
                 match predict(&input_data) {
                     Ok(result) => {
                         if let Some(estimate_number) = result {
@@ -209,6 +211,9 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             let canvas = model.canvas.get().expect("get canvas");
             let ctx = seed::canvas_context_2d(&canvas);
             ctx.clear_rect(0.0, 0.0, model.canvas_settings.width as f64, model.canvas_settings.height as f64)
+        },
+        Msg::TranslateSlideVar => {
+            model.var_hidden = !model.var_hidden;
         }
     }
 }
@@ -248,8 +253,9 @@ fn view(model: &Model) -> Vec<seed::virtual_dom::Node<Msg>> {
                 C![
                     "hero",
                     "bg-base-200",
-                    "flex-grow"
+                    "flex-1"
                 ],
+                page::partial::overlay_menu::view(&model),
                 match model.page {
                     Page::Home => page::home::view(),
                     Page::About => page::about::view(),
@@ -258,7 +264,6 @@ fn view(model: &Model) -> Vec<seed::virtual_dom::Node<Msg>> {
                     Page::InternalSeverError => page::internal_server_error::view(&model),
                 },
             ],
-            page::partial::footer::view(),
         ]
     ]
 }
