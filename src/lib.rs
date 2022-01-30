@@ -15,6 +15,7 @@ const TITLE_SUFFIX: &str = "SotaroProfile";
 const IMAGES_PATH: &str = "static/images";
 const ABOUT: &str = "about";
 const MNIST: &str = "mnist";
+const INTERNAL_SERVER_ERROR: &str = "internal_server_error";
 
 fn init(url: Url, orders: &mut impl Orders<Msg>) -> Model {
     orders.subscribe(Msg::UrlChanged);
@@ -53,6 +54,7 @@ pub enum Page {
     About,
     MNIST,
     NotFound,
+    InternalSeverError,
 }
 
 impl Page {
@@ -61,6 +63,7 @@ impl Page {
             [] => (Self::Home, TITLE_SUFFIX.to_owned()),
             [ABOUT] => (Self::About, format!("About - {TITLE_SUFFIX}")),
             [MNIST] => (Self::MNIST, format!("Mnist - {TITLE_SUFFIX}")),
+            [INTERNAL_SERVER_ERROR] => (Self::InternalSeverError, TITLE_SUFFIX.to_owned()),
             _ => (Self::NotFound, format!("Not found - {TITLE_SUFFIX}"))
         };
         document().set_title(&title);
@@ -122,6 +125,10 @@ impl<'a> Urls<'a> {
     pub fn mnist(self) -> Url {
         self.base_url().add_path_part(MNIST)
     }
+
+    pub fn internal_server_error(self) -> Url {
+        self.base_url().add_path_part(INTERNAL_SERVER_ERROR)
+    }
 }
 
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -173,22 +180,27 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 ctx.stroke();
                 model.drawable = false;
                 
-                let image_str: String = canvas.to_data_url_with_type("image/png")
-                    .unwrap()
-                    .to_string()
-                    .replace("data:image/png;base64,", "");
-
-                let buffer: Vec<u8> = base64::decode(&image_str)
-                    .unwrap();
-
-                let input_data = image::load_from_memory_with_format(&buffer, image::ImageFormat::Png)
-                    .unwrap()
-                    .to_luma_alpha8();
                 
-                if let Ok(result) = predict(&input_data) {
-                    if let Some(estimate_number) = result {
-                        model.estimate_number = Some(estimate_number.1 as u8);
-                    }
+                let buffer: Vec<u8> = match canvas.to_data_url_with_type("image/png") {
+                    Ok(image_str) => { 
+                        let image_str = image_str.to_string().replace("data:image/png;base64,", "");
+                        base64::decode(&image_str).unwrap()
+                    },
+                    Err(_) => { orders.request_url(Urls::new(&model.base_url).internal_server_error()); return; },
+                };
+
+                let input_data = match image::load_from_memory_with_format(&buffer, image::ImageFormat::Png) {
+                    Ok(input_data) => input_data.to_luma_alpha8(),
+                    Err(_) => { orders.request_url(Urls::new(&model.base_url).internal_server_error()); return; },
+                };
+                
+                match predict(&input_data) {
+                    Ok(result) => {
+                        if let Some(estimate_number) = result {
+                            model.estimate_number = Some(estimate_number.1 as u8);
+                        }
+                    },
+                    Err(_) => { orders.request_url(Urls::new(&model.base_url).internal_server_error()); return; },
                 }
             }
         },
@@ -242,6 +254,7 @@ fn view(model: &Model) -> Vec<seed::virtual_dom::Node<Msg>> {
                     Page::About => page::about::view(),
                     Page::MNIST => page::mnist::view(&model),
                     Page::NotFound => page::not_found::view(),
+                    Page::InternalSeverError => page::internal_server_error::view(&model),
                 },
             ],
             page::partial::footer::view(),

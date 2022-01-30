@@ -3,6 +3,10 @@ use seed::{prelude::*, *};
 
 pub fn view() -> Node<Msg> {
     div![
-        "hoge"
+        C![
+            "hero-content",
+            "text-center",
+        ],
+        p!["not found"]
     ]
 }
