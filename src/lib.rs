@@ -2,7 +2,7 @@
 
 mod page;
 mod config;
-use seed::{C, div, nodes, document};
+use seed::{C, div, nodes, document, window};
 #[cfg(debug_assertions)]
 use seed::console_error_panic_hook;
 use seed::prelude::*;
@@ -18,8 +18,10 @@ const MNIST: &str = "mnist";
 const INTERNAL_SERVER_ERROR: &str = "internal_server_error";
 
 fn init(url: Url, orders: &mut impl Orders<Msg>) -> Model {
-    orders.subscribe(Msg::UrlChanged);
-    orders.after_next_render(|_| Msg::Rendered);
+    orders.subscribe(Msg::UrlChanged)
+        .send_msg(Msg::WindowResized)
+        .after_next_render(|_| Msg::Rendered)
+        .stream(streams::window_event(Ev::Resize, |_| Msg::WindowResized));
 
     Model {
         base_url: url.to_base_url(),
@@ -112,7 +114,9 @@ pub enum Msg {
     Drawing(web_sys::MouseEvent),
     DrawEnd(web_sys::MouseEvent),
     ClearCanvas,
-    TranslateSlideVar,
+    TranslateSlideBar,
+    CloseSlideBar,
+    WindowResized,
 }
 
 seed::struct_urls!();
@@ -138,6 +142,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     match msg {
         Msg::UrlChanged(subs::UrlChanged(url)) => {
             model.page = Page::init(url);
+            model.var_hidden = true;
         },
         Msg::Rendered => {
             orders.after_next_render(|_| Msg::Rendered).skip();
@@ -196,7 +201,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                     Ok(input_data) => input_data.to_luma_alpha8(),
                     Err(_) => { orders.request_url(Urls::new(&model.base_url).internal_server_error()); return; },
                 };
-                
+
                 match predict(&input_data) {
                     Ok(result) => {
                         if let Some(estimate_number) = result {
@@ -212,8 +217,30 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             let ctx = seed::canvas_context_2d(&canvas);
             ctx.clear_rect(0.0, 0.0, model.canvas_settings.width as f64, model.canvas_settings.height as f64)
         },
-        Msg::TranslateSlideVar => {
+        Msg::TranslateSlideBar => {
             model.var_hidden = !model.var_hidden;
+        },
+        Msg::CloseSlideBar => {
+            model.var_hidden = true;
+        },
+        Msg::WindowResized => {
+            let window = window();
+            let width = window
+                .inner_width()
+                .expect("window width")
+                .unchecked_into::<js_sys::Number>()
+                .value_of();
+            let height = window
+                .inner_height()
+                .expect("window height")
+                .unchecked_into::<js_sys::Number>()
+                .value_of();
+            if width > config::TAILWIND_MD_WIDTH {
+                model.var_hidden = true
+            }
+            let min = std::cmp::min(height as u32, width as u32);
+            model.canvas_settings.view_height = std::cmp::min(min, config::CANVAS_VIEW_MIN_HEIGHT);
+            model.canvas_settings.view_width = std::cmp::min(min, config::CANVAS_VIEW_MIN_WIDTH);
         }
     }
 }

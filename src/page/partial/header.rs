@@ -134,7 +134,7 @@ pub fn view(model: &Model) -> Node<Msg> {
                         }
                     ],
                 ],
-                ev(Ev::Click, |_| Msg::TranslateSlideVar),
+                ev(Ev::Click, |_| Msg::TranslateSlideBar),
             ],
         ],
     ]
